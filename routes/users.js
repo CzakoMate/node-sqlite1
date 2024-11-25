@@ -33,10 +33,10 @@ router.post("/", async (req, res, next) => {
 
 router.put("/:id", async (req, res, next) => {
     try {
-        const user = await dbQuery("SELECT * FROM users WHERE id = ?;", [req.params.id]);
+        const [user] = await dbQuery("SELECT * FROM users WHERE id = ?;", [req.params.id]);
         if (!user) return res.status(404).json({ message: "User not found" });
 
-        await dbRun("UPDATE users SET name = ?, email = ? WHERE id = ?;", [req.body.name, req.body.email, req.params.id]);
+        await dbRun("UPDATE users SET name = ?, email = ? WHERE id = ?;", [req.body.name || user.name, req.body.email || user.email, req.params.id]);
         res.status(200).json({ id: req.params.id, ...req.body });
     } catch (err) {
         next(err);
@@ -45,7 +45,7 @@ router.put("/:id", async (req, res, next) => {
 
 router.delete("/:id", async (req, res, next) => {
     try {
-        const user = await dbQuery("SELECT * FROM users WHERE id = ?;", [req.params.id]);
+        const [user] = await dbQuery("SELECT * FROM users WHERE id = ?;", [req.params.id]);
         if (!user) return res.status(404).json({ message: "User not found" });
 
         await dbRun("DELETE FROM users WHERE id = ?;", [req.params.id]);
